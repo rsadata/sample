@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FSU Career Outcomes Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --garnet: #782F40;
+    --gold: #CEB888;
+    --bg: #edeae3;
+    --card: #fff;
+    --text: #1E293B;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .container { max-width: 800px; width: 100%; }
+  
+  .header { text-align: center; margin-bottom: 40px; }
+  .header h1 { font-family: 'Playfair Display', serif; font-size: 2.8rem; color: var(--garnet); margin-bottom: 12px; }
+  .header p { font-size: 1.1rem; color: #475569; max-width: 500px; margin: 0 auto; line-height: 1.5; }
+  
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  
+  .card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 40px 30px;
+    text-align: center;
+    text-decoration: none;
+    color: var(--text);
+    box-shadow: 0 10px 30px rgba(120, 47, 64, 0.08);
+    border: 2px solid transparent;
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .card:hover {
+    transform: translateY(-5px);
+    border-color: var(--gold);
+    box-shadow: 0 15px 40px rgba(120, 47, 64, 0.15);
+  }
+  
+  .card-icon { font-size: 2.5rem; margin-bottom: 20px; }
+  .card h2 { font-size: 1.4rem; color: var(--garnet); margin-bottom: 10px; }
+  .card p { font-size: 0.95rem; color: #64748B; line-height: 1.5; }
+  
+  .badge { display: inline-block; background: #FDE08B; color: #782F40; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 100px; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  @media(max-width: 700px) {
+    .grid { grid-template-columns: 1fr; }
+    .header h1 { font-size: 2.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>Career Outcomes Intelligence</h1>
+    <p>Select a dashboard below to view real-time pipeline analytics for the Spring 2026 pilot.</p>
+  </div>
+
+  <div class="grid">
+    <a href="fsu_cohort_report.html" class="card">
+      <div class="badge">For Leadership</div>
+      <div class="card-icon">📊</div>
+      <h2>Cohort Report</h2>
+      <p>High-level aggregate data tracking funnel drop-offs, engagement velocity, and time-to-click metrics.</p>
+    </a>
+    
+    <a href="fsu_student_report.html" class="card">
+      <div class="badge">For Counselors</div>
+      <div class="card-icon">🧑‍🎓</div>
+      <h2>Student Report</h2>
+      <p>Anonymized, FERPA-compliant view to instantly identify and flag at-risk students who need intervention.</p>
+    </a>
+  </div>
+</div>
+
+</body>
+</html>

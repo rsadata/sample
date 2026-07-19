@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FreshGrads — FSU Student Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Playfair+Display:wght@700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#edeae3; --card:#fff; --navy:#782F40; --navy2:#5C2431; --navy3:#411922;
+  --lime:#CEB888; --lime2:#B59F70; --green:#22c55e; --red:#ef4444; --amber:#f59e0b;
+  --muted:#6b7a90; --border:#e2ddd6; --shadow:0 4px 24px rgba(15,25,35,.09);
+  --shadow-lg:0 8px 48px rgba(15,25,35,.14); --r:20px; --r-sm:12px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--navy);min-height:100vh}
+@media print { 
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } 
+  @page { margin: 12mm; size: landscape; }
+  .sc-stat, .card, tr, .tb-pill { page-break-inside: avoid !important; break-inside: avoid !important; box-shadow: none !important; }
+  body { background: var(--bg); }
+}
+
+/* TOPBAR */
+.topbar{background:var(--navy);padding:14px 40px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid var(--navy2)}
+.logo-mark{width:30px;height:30px;background:var(--lime);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.9rem;color:var(--navy)}
+.logo-text{font-weight:700;color:#fff;font-size:.95rem}
+.logo-sub{font-size:.68rem;color:#E0C4C8}
+.tb-pill{padding:5px 12px;border-radius:100px;font-size:.7rem;font-weight:700;letter-spacing:.06em}
+.tb-lime{background:var(--lime);color:var(--navy)}
+.tb-ghost{border:1px solid #923C4F;color:#E0C4C8;font-size:.68rem}
+.live-badge{display:flex;align-items:center;gap:6px;font-size:.7rem;font-weight:600;color:#E0C4C8}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--lime);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* SEARCH/FILTER BAR */
+.filter-bar{background:#fff;border-bottom:1px solid var(--border);padding:14px 40px;display:flex;align-items:center;gap:14px}
+.search-wrap{position:relative;flex:1;max-width:420px}
+.search-wrap input{width:100%;padding:9px 14px 9px 38px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:.82rem;color:var(--navy);background:#faf9f6;outline:none;transition:border .2s}
+.search-wrap input:focus{border-color:var(--navy)}
+.search-wrap::before{content:'⌕';position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:1.1rem;color:var(--muted)}
+.filter-pills{display:flex;gap:8px}
+.fp{padding:7px 14px;border-radius:100px;font-size:.72rem;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:transparent;color:var(--muted);transition:all .15s}
+.fp.active{background:var(--navy);color:var(--lime);border-color:var(--navy)}
+.fp:hover:not(.active){border-color:var(--navy);color:var(--navy)}
+.results-count{font-size:.72rem;color:var(--muted);margin-left:auto}
+
+/* MAIN */
+.main{max-width:1300px;margin:0 auto;padding:36px 40px 80px}
+.section-label{font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;margin-top:44px;display:flex;align-items:center;gap:8px}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* SUMMARY STRIP */
+.summary-strip{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:32px}
+.ss-card{background:var(--card);border-radius:var(--r-sm);padding:16px 18px;border:1px solid var(--border);box-shadow:0 2px 8px rgba(15,25,35,.06)}
+.ss-label{font-size:.67rem;color:var(--muted);font-weight:500;margin-bottom:4px}
+.ss-val{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:900;color:var(--navy);line-height:1}
+.ss-sub{font-size:.65rem;color:var(--muted);margin-top:3px}
+
+/* STUDENT CARD */
+.students-grid{display:flex;flex-direction:column;gap:20px}
+.sc{background:var(--card);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden;transition:box-shadow .2s}
+.sc:hover{box-shadow:var(--shadow-lg)}
+.sc.expanded .sc-body{display:block}
+
+/* SC HEADER */
+.sc-head{display:flex;align-items:center;gap:20px;padding:20px 24px;cursor:pointer;user-select:none}
+.sc-head:hover{background:#faf9f6}
+.sc-avatar{width:44px;height:44px;border-radius:12px;background:var(--navy);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.75rem;color:var(--lime);flex-shrink:0;font-family:'JetBrains Mono',monospace}
+.sc-identity{flex:1;min-width:0}
+.sc-email{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:600;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc-id{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc-major-badge{padding:3px 9px;border-radius:100px;font-size:.67rem;font-weight:600;background:#f0ede7;color:var(--muted);white-space:nowrap;flex-shrink:0}
+.sc-mini-stats{display:flex;gap:20px;align-items:center;flex-shrink:0}
+.sc-mini{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:44px}
+.sc-mini-val{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:900;color:var(--navy);line-height:1}
+.sc-mini-label{font-size:.58rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.sc-status-badge{padding:5px 12px;border-radius:100px;font-size:.68rem;font-weight:700;flex-shrink:0}
+.sc-chevron{font-size:.8rem;color:var(--muted);transition:transform .25s;flex-shrink:0;margin-left:8px}
+.sc.expanded .sc-chevron{transform:rotate(180deg)}
+
+/* SC BODY */
+.sc-body{display:none;border-top:1px solid var(--border)}
+.sc-body-inner{padding:24px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.sc-section{display:flex;flex-direction:column;gap:8px}
+.sc-section-title{font-size:.67rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.metric-row{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:#f7f4ee;border-radius:8px}
+.mr-label{font-size:.75rem;color:var(--muted);font-weight:500}
+.mr-val{font-size:.82rem;font-weight:700;color:var(--navy)}
+.mr-val.pos{color:var(--green)}
+.mr-val.neg{color:var(--red)}
+.mr-val.lim{color:#7ab00a}
+
+/* FUNNEL MINI */
+.mini-funnel{display:flex;gap:6px;align-items:flex-end;height:60px;padding:0 10px}
+.mf-bar{flex:1;border-radius:5px 5px 0 0;background:var(--navy);display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px;font-size:.55rem;font-weight:700;color:#fff;min-height:6px;transition:all .3s}
+
+/* ACTIVITY TIMELINE MINI */
+.activity-dots{display:flex;flex-wrap:wrap;gap:4px;padding:10px}
+.ad{width:10px;height:10px;border-radius:3px;background:#e9e5de}
+.ad.v1{background:#1e2b45;opacity:.5}
+.ad.v2{background:#1e2b45;opacity:.7}
+.ad.v3{background:var(--navy)}
+.ad.lime{background:var(--lime)}
+
+/* WINDOW TABS inline */
+.win-mini{display:flex;gap:5px;margin-bottom:8px}
+.wm-btn{padding:4px 10px;border-radius:100px;font-size:.65rem;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:transparent;color:var(--muted);transition:all .15s}
+.wm-btn.active{background:var(--navy);color:var(--lime);border-color:var(--navy)}
+
+/* CHART CARD */
+.chart-card{background:var(--card);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--shadow);padding:24px}
+.g2{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.76rem}
+thead tr{border-bottom:2px solid var(--navy)}
+thead th{padding:10px 12px;text-align:left;font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
+tbody tr:hover{background:#f7f4ef}
+td{padding:12px 12px;color:var(--navy);white-space:nowrap;vertical-align:middle}
+.tag{display:inline-block;padding:3px 9px;border-radius:100px;font-size:.65rem;font-weight:700}
+.tag-lime{background:var(--lime);color:var(--navy)}
+.tag-green{background:#f0fdf4;color:var(--green)}
+.tag-red{background:#fef2f2;color:var(--red)}
+.tag-muted{background:#f0ede7;color:var(--muted)}
+.tag-navy{background:var(--navy);color:#fff}
+.mono{font-family:'JetBrains Mono',monospace;font-size:.72rem}
+
+/* NO RESULTS */
+.no-results{text-align:center;padding:60px 20px;color:var(--muted);font-size:.85rem}
+
+/* FOOTER */
+.footer{background:var(--navy);padding:24px 40px}
+.footer-inner{max-width:1300px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.footer p{font-size:.72rem;color:#4a5a7a}
+.footer strong{color:#E0C4C8}
+
+@media(max-width:900px){.summary-strip{grid-template-columns:repeat(3,1fr)}.sc-body-inner{grid-template-columns:1fr}.sc-mini-stats{display:none}.g2,.g3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<nav class="topbar">
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="logo-mark">G</div>
+    <div>
+      <div class="logo-text">FreshGrads for Florida State University</div>
+      <div class="logo-sub">Individual Student Intelligence</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <div class="live-badge"><div class="live-dot"></div>LIVE DATA</div>
+    <span class="tb-pill tb-ghost">FSU PILOT</span>
+    <span class="tb-pill tb-lime">STUDENT REPORT</span>
+  </div>
+</nav>
+
+<!-- FILTER BAR -->
+<div class="filter-bar">
+  <div class="search-wrap">
+    <input type="text" id="searchInput" placeholder="Search by student code (e.g. AB4721) or major…" oninput="filterStudents()"/>
+  </div>
+  <div class="filter-pills">
+    <button class="fp active" onclick="filterStatus('all',this)">All</button>
+    <button class="fp" onclick="filterStatus('accepted',this)">Accepted ✓</button>
+    <button class="fp" onclick="filterStatus('offered',this)">Offered</button>
+    <button class="fp" onclick="filterStatus('interviewing',this)">Interviewing</button>
+    <button class="fp" onclick="filterStatus('applied',this)">Applied Only</button>
+    <button class="fp" onclick="filterStatus('at-risk',this)">⚑ At-Risk</button>
+  </div>
+  <div class="results-count" id="results-count">8 students</div>
+</div>
+
+<div class="main">
+
+<!-- SUMMARY STRIP -->
+<div class="summary-strip">
+  <div class="ss-card"><div class="ss-label">Students</div><div class="ss-val">8</div><div class="ss-sub">Active pilot</div></div>
+  <div class="ss-card"><div class="ss-label">Applications</div><div class="ss-val">40</div><div class="ss-sub">Total filed</div></div>
+  <div class="ss-card"><div class="ss-label">Interviews</div><div class="ss-val">14</div><div class="ss-sub">35% app rate</div></div>
+  <div class="ss-card"><div class="ss-label">Offers</div><div class="ss-val">10</div><div class="ss-sub">71% int rate</div></div>
+  <div class="ss-card" style="background:var(--navy);border-color:var(--navy2)"><div class="ss-label" style="color:#6b7a90">Accepted</div><div class="ss-val" style="color:var(--lime)">8</div><div class="ss-sub" style="color:#6b7a90">80% offer rate</div></div>
+  <div class="ss-card"><div class="ss-label">At-Risk</div><div class="ss-val" style="color:var(--amber)">4</div><div class="ss-sub">0 interviews</div></div>
+</div>
+
+<!-- STUDENT CARDS -->
+<div class="section-label">Individual Student Records</div>
+<div class="students-grid" id="students-grid"></div>
+
+<!-- FULL TABLE -->
+<div class="section-label" style="margin-top:52px">Complete Data Table</div>
+<div class="chart-card">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+    <div>
+      <div style="font-size:.95rem;font-weight:700">All Metrics by Student ID</div>
+      <div style="font-size:.73rem;color:var(--muted);margin-top:2px">Append-only event log · grouped by user_id + job_title · created_at delta calculations</div>
+    </div>
+    <span class="tag tag-muted">FERPA Compliant · No Names</span>
+  </div>
+  <div class="tbl-wrap"><table id="main-table"></table></div>
+</div>
+
+<!-- CHARTS -->
+<div class="section-label">Cross-Student Analytics</div>
+<div class="g2">
+  <div class="chart-card">
+    <div style="font-size:.9rem;font-weight:700;margin-bottom:4px">Funnel by Student ID</div>
+    <div style="font-size:.72rem;color:var(--muted);margin-bottom:18px">Applied → Interview → Offer → Accepted</div>
+    <div style="height:220px"><canvas id="stackedChart"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <div style="font-size:.9rem;font-weight:700;margin-bottom:4px">Engagement Velocity by Student</div>
+    <div style="font-size:.72rem;color:var(--muted);margin-bottom:18px">Days from view to apply — lower is more engaged</div>
+    <div style="height:220px"><canvas id="velChart"></canvas></div>
+  </div>
+</div>
+<div class="g3" style="margin-top:20px">
+  <div class="chart-card">
+    <div style="font-size:.9rem;font-weight:700;margin-bottom:4px">Activity Last 28 Days</div>
+    <div style="height:180px"><canvas id="activityChart"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <div style="font-size:.9rem;font-weight:700;margin-bottom:4px">Not-Selected Tracking</div>
+    <div style="height:180px"><canvas id="nsChart"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <div style="font-size:.9rem;font-weight:700;margin-bottom:4px">Save → Apply Rate</div>
+    <div style="height:180px"><canvas id="s2aChart"></canvas></div>
+  </div>
+</div>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <p><strong>FreshGrads for Florida State University</strong> — Individual Student Intelligence Report</p>
+    <p>Florida State University · Pilot Cohort · Simulated Data · July 2026</p>
+    <p>Student names omitted per FERPA · Identified by email + user_id only</p>
+  </div>
+</footer>
+
+<script>
+const C = {lime:'#CEB888',navy:'#782F40',navy2:'#5C2431',navy3:'#411922',green:'#22c55e',red:'#ef4444',amber:'#f59e0b',muted:'#6b7a90'};
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.color = C.muted;
+
+const students = [
+  {id:"stu-fsu-001",code:"AB4721",major:"Marketing",      explored:18,saved:10,applied:6,interviews:3,offered:2,accepted:1,nsApp:1,nsInt:0,vel:2.6,offVel:2.1,pctS2A:60,avgS2A:1.0,appIntRate:50, intOffRate:66.7,avgTTO:17.8,avgOA:3.1,atRisk:false,stage:"accepted",  ev7:11,ev14:18,ev21:25,ev28:33,avgTTC:4.3,avgE2A:2.6,avgA2I:8.8},
+  {id:"stu-fsu-002",code:"CM8293",major:"Comp. Science",  explored:10,saved:6, applied:2,interviews:0,offered:0,accepted:0,nsApp:0,nsInt:0,vel:4.2,offVel:null,pctS2A:33,avgS2A:2.1,appIntRate:0,  intOffRate:0,  avgTTO:null, avgOA:null, atRisk:true, stage:"applied",   ev7:2, ev14:5, ev21:8, ev28:11,avgTTC:5.1,avgE2A:4.2,avgA2I:null},
+  {id:"stu-fsu-003",code:"PN5614",major:"Finance",        explored:13,saved:4, applied:3,interviews:0,offered:0,accepted:0,nsApp:1,nsInt:0,vel:4.0,offVel:null,pctS2A:75,avgS2A:1.9,appIntRate:0,  intOffRate:0,  avgTTO:null, avgOA:null, atRisk:true, stage:"applied",   ev7:3, ev14:10,ev21:13,ev28:14,avgTTC:5.5,avgE2A:4.0,avgA2I:null},
+  {id:"stu-fsu-004",code:"JL3847",major:"Mech. Eng.",     explored:8, saved:6, applied:4,interviews:0,offered:0,accepted:0,nsApp:1,nsInt:0,vel:2.3,offVel:null,pctS2A:67,avgS2A:1.2,appIntRate:0,  intOffRate:0,  avgTTO:null, avgOA:null, atRisk:true, stage:"applied",   ev7:4, ev14:11,ev21:14,ev28:17,avgTTC:5.9,avgE2A:2.3,avgA2I:null},
+  {id:"stu-fsu-005",code:"DW9152",major:"Communications", explored:18,saved:11,applied:8,interviews:4,offered:2,accepted:1,nsApp:0,nsInt:0,vel:3.6,offVel:2.6,pctS2A:73,avgS2A:2.0,appIntRate:50, intOffRate:50, avgTTO:12.6, avgOA:2.2, atRisk:false,stage:"accepted",  ev7:5, ev14:9, ev21:17,ev28:31,avgTTC:5.3,avgE2A:3.6,avgA2I:10.5},
+  {id:"stu-fsu-006",code:"EP7436",major:"Comp. Science",  explored:15,saved:14,applied:8,interviews:4,offered:3,accepted:3,nsApp:2,nsInt:1,vel:3.5,offVel:4.1,pctS2A:57,avgS2A:1.6,appIntRate:50, intOffRate:75, avgTTO:16.7, avgOA:1.5, atRisk:false,stage:"accepted",  ev7:12,ev14:17,ev21:32,ev28:44,avgTTC:4.7,avgE2A:3.5,avgA2I:11.3},
+  {id:"stu-fsu-007",code:"SR2981",major:"Biz Analytics",  explored:18,saved:11,applied:7,interviews:3,offered:3,accepted:3,nsApp:2,nsInt:0,vel:3.6,offVel:3.8,pctS2A:64,avgS2A:2.0,appIntRate:42.9,intOffRate:100,avgTTO:14.0, avgOA:1.6, atRisk:false,stage:"accepted",  ev7:11,ev14:17,ev21:27,ev28:33,avgTTC:6.5,avgE2A:3.6,avgA2I:9.8},
+  {id:"stu-fsu-008",code:"MJ6035",major:"Finance",        explored:8, saved:5, applied:2,interviews:0,offered:0,accepted:0,nsApp:0,nsInt:0,vel:2.5,offVel:null,pctS2A:40,avgS2A:1.9,appIntRate:0,  intOffRate:0,  avgTTO:null, avgOA:null, atRisk:true, stage:"applied",   ev7:1, ev14:6, ev21:9, ev28:11,avgTTC:4.7,avgE2A:2.5,avgA2I:null},
+];
+
+const stageColor = {accepted:C.lime, offered:'#b59f70', interviewing:'#2d7dd2', applied:C.muted, 'at-risk':C.amber};
+const stageBg    = {accepted:C.navy, offered:'#5C2431', interviewing:'#1e3a5f', applied:'#f0ede7', 'at-risk':'#fff8eb'};
+const stageTxt   = {accepted:C.lime, offered:'#CEB888', interviewing:'#7fc4f0', applied:C.muted, 'at-risk':C.amber};
+
+function getStageLabel(s) {
+  if (s.accepted > 0) return 'Accepted';
+  if (s.offered > 0) return 'Offered';
+  if (s.interviews > 0) return 'Interviewing';
+  if (s.atRisk) return '⚑ At-Risk';
+  return 'Applied';
+}
+function getStageKey(s) {
+  if (s.accepted > 0) return 'accepted';
+  if (s.offered > 0) return 'offered';
+  if (s.interviews > 0) return 'interviewing';
+  if (s.atRisk) return 'at-risk';
+  return 'applied';
+}
+function fmt(v, suffix='') { return v != null ? v + suffix : '—'; }
+function pctColor(v) { return v >= 40 ? C.green : v > 0 ? C.amber : C.red; }
+
+// ── RENDER STUDENT CARDS ──
+let currentFilter = 'all';
+let currentSearch = '';
+
+function renderCards() {
+  const grid = document.getElementById('students-grid');
+  const visible = students.filter(s => {
+    const sk = getStageKey(s);
+    const matchFilter = currentFilter === 'all' || (currentFilter === 'at-risk' ? s.atRisk : sk === currentFilter);
+    const matchSearch = !currentSearch || s.code.toLowerCase().includes(currentSearch) || s.id.includes(currentSearch) || s.major.toLowerCase().includes(currentSearch);
+    return matchFilter && matchSearch;
+  });
+  document.getElementById('results-count').textContent = `${visible.length} student${visible.length!==1?'s':''}`;
+  if (visible.length === 0) {
+    grid.innerHTML = '<div class="no-results">No students match your filter.</div>';
+    return;
+  }
+  grid.innerHTML = visible.map(s => {
+    const sk = getStageKey(s);
+    const funnelH = [s.explored,s.saved,s.applied,s.interviews,s.offered,s.accepted];
+    const fMax = Math.max(...funnelH);
+    const fBars = funnelH.map((v,i) => {
+      const h = fMax > 0 ? Math.round((v/fMax)*50) : 6;
+      const col = i === 5 ? C.lime : i >= 3 ? C.lime2 : C.navy;
+      return `<div class="mf-bar" style="height:${Math.max(h,6)}px;background:${col}">${v}</div>`;
+    }).join('');
+    return `
+    <div class="sc" id="card-${s.id}" onclick="toggleCard('${s.id}')">
+      <div class="sc-head">
+        <div class="sc-avatar">${s.code.slice(0,2)}</div>
+        <div class="sc-identity">
+          <div class="sc-email">${s.code}</div>
+          <div class="sc-id">${s.id}</div>
+        </div>
+        <div class="sc-major-badge">${s.major}</div>
+        <div class="sc-mini-stats">
+          <div class="sc-mini"><div class="sc-mini-val">${s.applied}</div><div class="sc-mini-label">Applied</div></div>
+          <div class="sc-mini"><div class="sc-mini-val">${s.interviews}</div><div class="sc-mini-label">Intrvw</div></div>
+          <div class="sc-mini"><div class="sc-mini-val">${s.offered}</div><div class="sc-mini-label">Offered</div></div>
+          <div class="sc-mini" style="min-width:52px"><div class="sc-mini-val" style="color:${s.accepted>0?C.lime:C.muted}">${s.accepted}</div><div class="sc-mini-label">Accepted</div></div>
+        </div>
+        <span class="sc-status-badge" style="background:${s.accepted>0?C.navy:s.atRisk?'#fff8eb':'#f0ede7'};color:${s.accepted>0?C.lime:s.atRisk?C.amber:C.muted}">${getStageLabel(s)}</span>
+        <span class="sc-chevron">▼</span>
+      </div>
+      <div class="sc-body">
+        <div class="sc-body-inner">
+
+          <!-- COL 1: EXPLORED + SAVED -->
+          <div class="sc-section">
+            <div class="sc-section-title">Exploration & Saves</div>
+            <div class="metric-row"><div class="mr-label">Roles Explored</div><div class="mr-val">${s.explored}</div></div>
+            <div class="metric-row"><div class="mr-label">Avg Days: Job Posted → Clicked</div><div class="mr-val">${fmt(s.avgTTC,'d')}</div></div>
+            <div class="metric-row"><div class="mr-label">Roles Saved</div><div class="mr-val">${s.saved}</div></div>
+            <div class="metric-row"><div class="mr-label">Saved → Applied</div><div class="mr-val lim">${s.pctS2A}%</div></div>
+            <div class="metric-row"><div class="mr-label">Avg Days Save→Apply</div><div class="mr-val">${fmt(s.avgS2A,'d')}</div></div>
+            <div class="sc-section-title" style="margin-top:12px">Activity Windows</div>
+            <div class="metric-row"><div class="mr-label">Last 7 days</div><div class="mr-val">${s.ev7} events</div></div>
+            <div class="metric-row"><div class="mr-label">Last 14 days</div><div class="mr-val">${s.ev14} events</div></div>
+            <div class="metric-row"><div class="mr-label">Last 21 days</div><div class="mr-val">${s.ev21} events</div></div>
+            <div class="metric-row"><div class="mr-label">Last 28 days</div><div class="mr-val">${s.ev28} events</div></div>
+          </div>
+
+          <!-- COL 2: APPLICATIONS + INTERVIEWS -->
+          <div class="sc-section">
+            <div class="sc-section-title">Applications</div>
+            <div class="metric-row"><div class="mr-label">Total Applied</div><div class="mr-val">${s.applied}</div></div>
+            <div class="metric-row"><div class="mr-label">App → Interview Rate</div><div class="mr-val lim" style="color:${pctColor(s.appIntRate)}">${s.appIntRate}%</div></div>
+            <div class="metric-row"><div class="mr-label">Avg Days Explore→Apply</div><div class="mr-val">${fmt(s.avgE2A,'d')}</div></div>
+            <div class="metric-row"><div class="mr-label">Not-Selected Post-Apply</div><div class="mr-val ${s.nsApp>0?'neg':''}">${s.nsApp}</div></div>
+            <div class="sc-section-title" style="margin-top:12px">Interviews</div>
+            <div class="metric-row"><div class="mr-label">Total Interviews</div><div class="mr-val">${s.interviews}</div></div>
+            <div class="metric-row"><div class="mr-label">Avg Days Apply→Interview</div><div class="mr-val">${fmt(s.avgA2I,'d')}</div></div>
+            <div class="metric-row"><div class="mr-label">Not-Selected Post-Int</div><div class="mr-val ${s.nsInt>0?'neg':''}">${s.nsInt}</div></div>
+            <div class="sc-section-title" style="margin-top:12px">Pipeline Mini-Funnel</div>
+            <div class="mini-funnel">${fBars}</div>
+            <div style="display:flex;gap:6px;padding:0 10px;font-size:.55rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em">
+              <div style="flex:1;text-align:center">Exp</div><div style="flex:1;text-align:center">Svd</div><div style="flex:1;text-align:center">App</div><div style="flex:1;text-align:center">Int</div><div style="flex:1;text-align:center">Off</div><div style="flex:1;text-align:center">Acc</div>
+            </div>
+          </div>
+
+          <!-- COL 3: OFFERS + VELOCITY -->
+          <div class="sc-section">
+            <div class="sc-section-title">Offers & Outcomes</div>
+            <div class="metric-row"><div class="mr-label">Total Offers</div><div class="mr-val ${s.offered>0?'lim':''}">${s.offered}</div></div>
+            <div class="metric-row"><div class="mr-label">Offer % of Applied</div><div class="mr-val">${s.applied>0?Math.round(s.offered/s.applied*100):0}%</div></div>
+            <div class="metric-row"><div class="mr-label">Int → Offer Rate</div><div class="mr-val lim" style="color:${pctColor(s.intOffRate)}">${s.intOffRate}%</div></div>
+            <div class="metric-row"><div class="mr-label">Avg Time Apply→Offer</div><div class="mr-val">${fmt(s.avgTTO,'d')}</div></div>
+            <div class="metric-row"><div class="mr-label">Accepted</div><div class="mr-val ${s.accepted>0?'pos':''}">${s.accepted}</div></div>
+            <div class="metric-row"><div class="mr-label">Avg Days Offer→Accept</div><div class="mr-val">${fmt(s.avgOA,'d')}</div></div>
+            <div class="sc-section-title" style="margin-top:12px">Engagement Velocity</div>
+            <div class="metric-row"><div class="mr-label">View→Apply (all apps)</div><div class="mr-val" style="color:${s.vel<3?C.lime2:s.vel<4?C.amber:C.muted}">${fmt(s.vel,'d')}</div></div>
+            <div class="metric-row"><div class="mr-label">View→Apply (offered jobs)</div><div class="mr-val" style="color:${s.offVel&&s.offVel<3?C.lime2:C.muted}">${fmt(s.offVel,'d')}</div></div>
+            ${s.atRisk ? `<div style="margin-top:12px;padding:10px 12px;background:#fff8eb;border:1px solid #fde68a;border-radius:10px;font-size:.72rem;color:${C.amber};font-weight:600">⚑ At-Risk: ${s.applied} applications, 0 interviews.<br/>Recommend counselor outreach.</div>` : ''}
+          </div>
+
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleCard(id) {
+  const el = document.getElementById(`card-${id}`);
+  el.classList.toggle('expanded');
+}
+function filterStatus(val, btn) {
+  document.querySelectorAll('.fp').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter = val;
+  renderCards();
+}
+function filterStudents() {
+  currentSearch = document.getElementById('searchInput').value.toLowerCase();
+  renderCards();
+}
+
+renderCards();
+
+// ── MAIN TABLE ──
+const tbl = document.getElementById('main-table');
+const headers = ['Student Code','System ID','Major','Explored','Saved','Saved→Applied %','Applied','App→Int %','Not-Sel (App)','Interviews','Apply→Int (d)','Not-Sel (Int)','Velocity (d)','Offers','Int→Offer %','Avg TTO (d)','Accepted','Offer→Accept (d)','Stage'];
+tbl.innerHTML = `<thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead>`;
+const tbody = document.createElement('tbody');
+students.forEach(s => {
+  const sk = getStageKey(s);
+  const stageTag = `<span class="tag ${s.accepted>0?'tag-lime':s.atRisk?'tag-muted':'tag-muted'}" style="background:${s.accepted>0?C.navy:s.atRisk?'#fff8eb':'#f0ede7'};color:${s.accepted>0?C.lime:s.atRisk?C.amber:C.muted}">${getStageLabel(s)}</span>`;
+  const row = [
+    `<span class="mono" style="font-weight:700">${s.code}</span>`,
+    `<span class="mono" style="color:${C.muted}">${s.id}</span>`,
+    s.major,
+    s.explored, s.saved,
+    `<span style="font-weight:700;color:${pctColor(s.pctS2A)}">${s.pctS2A}%</span>`,
+    `<strong>${s.applied}</strong>`,
+    `<span style="font-weight:700;color:${pctColor(s.appIntRate)}">${s.appIntRate}%</span>`,
+    s.nsApp > 0 ? `<span style="color:${C.red};font-weight:700">${s.nsApp}</span>` : `<span style="color:#d1d5db">0</span>`,
+    s.interviews,
+    fmt(s.avgA2I,'d'),
+    s.nsInt > 0 ? `<span style="color:${C.red};font-weight:700">${s.nsInt}</span>` : `<span style="color:#d1d5db">0</span>`,
+    `<span style="font-weight:700;color:${s.vel<3?'#7ab00a':s.vel<4?C.amber:C.muted}">${s.vel}d</span>`,
+    s.offered,
+    `<span style="font-weight:700;color:${pctColor(s.intOffRate)}">${s.intOffRate}%</span>`,
+    fmt(s.avgTTO,'d'),
+    s.accepted > 0 ? `<span style="font-weight:800;color:${C.lime};background:${C.navy};padding:2px 8px;border-radius:100px">${s.accepted}</span>` : `<span style="color:#d1d5db">0</span>`,
+    fmt(s.avgOA,'d'),
+    stageTag,
+  ];
+  const tr = document.createElement('tr');
+  tr.innerHTML = row.map(c=>`<td>${c}</td>`).join('');
+  tbody.appendChild(tr);
+});
+tbl.appendChild(tbody);
+
+// ── CHARTS ──
+const shortIds = students.map(s=>s.code);
+
+new Chart(document.getElementById('stackedChart'), {
+  type:'bar',
+  data:{
+    labels: shortIds,
+    datasets:[
+      {label:'Applied',   data:students.map(s=>s.applied),   backgroundColor:'#1E293B',  borderRadius:0},
+      {label:'Interviews',data:students.map(s=>s.interviews), backgroundColor:'#CEB888', borderRadius:0},
+      {label:'Offers',    data:students.map(s=>s.offered),   backgroundColor:'#A3243B',  borderRadius:0},
+      {label:'Accepted',  data:students.map(s=>s.accepted),  backgroundColor:'#782F40',   borderRadius:[6,6,0,0]},
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10,padding:10}}},
+    scales:{
+      x:{stacked:true,grid:{display:false},ticks:{font:{size:10,weight:'700'}}},
+      y:{stacked:true,grid:{color:'#f0ede7'},border:{display:false},ticks:{font:{size:10}}}
+    }
+  }
+});
+
+new Chart(document.getElementById('velChart'), {
+  type:'bar',
+  data:{
+    labels: shortIds,
+    datasets:[
+      {label:'All Apps',     data:students.map(s=>s.vel),                   backgroundColor:C.navy,  borderRadius:6,borderSkipped:false},
+      {label:'Offered Jobs', data:students.map(s=>s.offVel??0),             backgroundColor:C.lime,  borderRadius:6,borderSkipped:false},
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10}}},
+    scales:{
+      x:{grid:{display:false},ticks:{font:{size:10,weight:'700'}}},
+      y:{grid:{color:'#f0ede7'},border:{display:false},ticks:{callback:v=>v+'d',font:{size:10}}}
+    }
+  }
+});
+
+new Chart(document.getElementById('activityChart'), {
+  type:'bar',
+  data:{labels:shortIds,datasets:[{label:'Events (28d)',data:students.map(s=>s.ev28),backgroundColor:students.map(s=>s.accepted>0?C.lime:C.navy),borderRadius:6,borderSkipped:false}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:9,weight:'700'}}},y:{grid:{color:'#f0ede7'},border:{display:false},ticks:{font:{size:9}}}}}
+});
+
+new Chart(document.getElementById('nsChart'), {
+  type:'bar',
+  data:{labels:shortIds,datasets:[
+    {label:'Post-Apply',   data:students.map(s=>s.nsApp),backgroundColor:C.red,   borderRadius:6,borderSkipped:false},
+    {label:'Post-Interview',data:students.map(s=>s.nsInt),backgroundColor:C.amber, borderRadius:6,borderSkipped:false},
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:9},boxWidth:8}}},scales:{x:{grid:{display:false},ticks:{font:{size:9,weight:'700'}}},y:{grid:{color:'#f0ede7'},border:{display:false},ticks:{stepSize:1,font:{size:9}}}}}
+});
+
+new Chart(document.getElementById('s2aChart'), {
+  type:'bar',
+  data:{labels:shortIds,datasets:[{label:'Saved→Applied %',data:students.map(s=>s.pctS2A),backgroundColor:students.map(s=>s.pctS2A>=60?C.lime:s.pctS2A>=40?C.amber:C.red),borderRadius:6,borderSkipped:false}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.raw}%`}}},scales:{x:{grid:{display:false},ticks:{font:{size:9,weight:'700'}}},y:{max:100,grid:{color:'#f0ede7'},border:{display:false},ticks:{callback:v=>v+'%',font:{size:9}}}}}
+});
+</script>
+</body>
+</html>

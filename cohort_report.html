@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>University Career Outcomes — Spring 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f8fafc;--card:#fff;--navy:#0f172a;--navy2:#1e293b;--navy3:#334155;
+  --lime:#0ea5e9;--lime2:#0284c7;--green:#22c55e;--red:#ef4444;--amber:#f59e0b;
+  --muted:#64748b;--border:#e2e8f0;
+  --shadow:0 4px 24px rgba(15,25,35,.08);--shadow-lg:0 8px 48px rgba(15,25,35,.13);
+  --r:20px;--r-sm:12px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--navy);min-height:100vh}
+@media print { 
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } 
+  @page { margin: 12mm; size: landscape; }
+  .stat, .card, .insight, tr, .ab-action { page-break-inside: avoid !important; break-inside: avoid !important; box-shadow: none !important; }
+  body { background: var(--bg); }
+}
+
+/* ── NAV ── */
+nav{background:var(--navy);padding:13px 44px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-box{width:30px;height:30px;background:var(--lime);border-radius:8px;display:grid;place-items:center;font-weight:900;font-size:.88rem;color:var(--navy)}
+.logo-name{font-weight:700;color:#fff;font-size:.92rem}
+.logo-tagline{font-size:.65rem;color:#94a3b8;margin-top:1px}
+.nav-right{display:flex;align-items:center;gap:10px}
+.pill{padding:5px 13px;border-radius:100px;font-size:.68rem;font-weight:700;letter-spacing:.05em}
+.pill-lime{background:var(--lime);color:var(--navy)}
+.pill-ghost{border:1px solid #334155;color:#94a3b8}
+.dot-live{display:flex;align-items:center;gap:5px;font-size:.68rem;color:#94a3b8;font-weight:600}
+.dot-live::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--lime);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── HERO ── */
+.hero{background:var(--navy);padding:64px 44px 52px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-100px;right:-60px;width:480px;height:480px;border-radius:50%;background:radial-gradient(circle,rgba(14,165,233,.07) 0%,transparent 65%);pointer-events:none}
+.hero::after{content:'';position:absolute;bottom:-80px;left:30%;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle,rgba(14,165,233,.04) 0%,transparent 65%);pointer-events:none}
+.hero-inner{max-width:1180px;margin:0 auto;position:relative;z-index:1}
+.hero-tag{font-size:.68rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--lime);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.hero-tag::before{content:'';width:18px;height:2px;background:var(--lime);border-radius:2px;display:inline-block}
+.hero h1{font-size:2.9rem;font-weight:900;color:#fff;line-height:1.06;letter-spacing:-.02em;margin-bottom:10px}
+.hero h1 em{color:var(--lime);font-style:normal}
+.hero-desc{font-size:1.05rem;color:#94a3b8;max-width:640px;line-height:1.55;margin-bottom:40px;margin-top:6px}
+.hero-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.04);border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.05)}
+.hk{padding:24px 22px;background:rgba(255,255,255,.025);transition:background .2s;cursor:default}
+.hk:hover{background:rgba(14,165,233,.04)}
+.hk-label{font-size:.67rem;color:#94a3b8;font-weight:500;letter-spacing:.03em;margin-bottom:6px}
+.hk-val{font-size:2rem;font-weight:900;color:#fff;line-height:1}
+.hk-context{font-size:.67rem;color:var(--lime);font-weight:600;margin-top:5px}
+
+/* ── LAYOUT ── */
+.main{max-width:1180px;margin:0 auto;padding:44px 44px 80px}
+.section-head{display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:48px}
+.section-head h2{font-size:1.1rem;font-weight:700;letter-spacing:0.02em;color:var(--navy);white-space:nowrap}
+.section-head::after{content:'';flex:1;height:1px;background:var(--border)}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.g2{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.g21{display:grid;grid-template-columns:2fr 1fr;gap:20px}
+
+/* ── STAT CARD ── */
+.stat{background:var(--card);border-radius:var(--r);padding:22px 24px;border:1px solid var(--border);box-shadow:var(--shadow);transition:transform .18s,box-shadow .18s}
+.stat:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.stat-dark{background:var(--navy);border-color:var(--navy2)}
+.stat .s-label{font-size:.72rem;color:var(--muted);font-weight:500;margin-bottom:6px}
+.stat-dark .s-label{color:#94a3b8}
+.stat .s-row{display:flex;align-items:baseline;gap:8px}
+.stat .s-val{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:900;color:var(--navy);line-height:1}
+.stat-dark .s-val{color:#fff}
+.stat .s-badge{font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:100px}
+.badge-green{background:#f0fdf4;color:var(--green)}
+.badge-red{background:#fef2f2;color:var(--red)}
+.badge-amber{background:#fffbeb;color:var(--amber)}
+.badge-muted{background:#f0ede7;color:var(--muted)}
+.stat .s-note{font-size:.7rem;color:var(--muted);margin-top:5px}
+.stat-dark .s-note{color:#94a3b8}
+
+/* ── CARD ── */
+.card{background:var(--card);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--shadow)}
+.c-pad{padding:26px 28px}
+.c-head{display:flex;flex-direction:column;align-items:flex-start;margin-bottom:22px}
+.c-title{font-size:.92rem;font-weight:700;color:var(--navy);line-height:1.4}
+.c-sub{font-size:.7rem;color:var(--muted);margin-top:10px;line-height:1.4}
+
+/* ── FUNNEL ── */
+.funnel-row{display:flex;align-items:center;gap:12px;margin-bottom:9px}
+.fr-label{width:165px;font-size:.77rem;font-weight:500;color:var(--navy);flex-shrink:0}
+.fr-track{flex:1;height:36px;background:#f3f0ea;border-radius:8px;overflow:hidden}
+.fr-fill{height:100%;display:flex;align-items:center;padding:0 14px;font-size:.74rem;font-weight:700;white-space:nowrap;border-radius:8px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.fr-count{width:68px;text-align:right;font-size:.77rem;font-weight:700;color:var(--navy);flex-shrink:0;padding-left:8px}
+.fr-sub{width:96px;text-align:right;font-size:.68rem;color:var(--muted);flex-shrink:0}
+
+/* ── INSIGHT CARDS ── */
+.insight{background:var(--navy);border-radius:var(--r);padding:24px 26px}
+.i-tag{font-size:.63rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--lime);margin-bottom:8px}
+.i-body{font-size:.85rem;color:#b0c4de;line-height:1.55}
+.i-body strong{color:#fff}
+.i-number{font-family:'Playfair Display',serif;font-size:1.55rem;font-weight:900;color:var(--lime);margin-top:10px}
+
+/* ── MAJOR TABLE ── */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.78rem}
+thead tr{border-bottom:2px solid var(--navy)}
+thead th{padding:10px 14px;font-size:.63rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--border);transition:background .14s}
+tbody tr:hover{background:#f7f4ef}
+td{padding:13px 14px;color:var(--navy);white-space:nowrap;vertical-align:middle}
+td:first-child{font-weight:600}
+.tag{display:inline-block;padding:3px 9px;border-radius:100px;font-size:.65rem;font-weight:700}
+.tag-lime{background:var(--lime);color:var(--navy)}
+.tag-green{background:#f0fdf4;color:var(--green)}
+.tag-muted{background:#f0ede7;color:var(--muted)}
+.tag-red{background:#fef2f2;color:var(--red)}
+
+/* ── PROGRESS BAR ── */
+.prog-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.prog-label{width:140px;font-size:.76rem;font-weight:500;color:var(--navy);flex-shrink:0}
+.prog-bg{flex:1;height:9px;background:#f0ede7;border-radius:100px;overflow:hidden}
+.prog-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--navy2),var(--lime))}
+.prog-val{width:44px;text-align:right;font-size:.76rem;font-weight:700;color:var(--navy)}
+
+/* ── BAR CHART ── */
+.chart-h200{height:200px;position:relative}
+.chart-h220{height:220px;position:relative}
+
+/* ── TIME CALLOUT ── */
+.time-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px}
+.tg-item{background:#f7f4ee;border-radius:var(--r-sm);padding:14px 16px}
+.tg-label{font-size:.68rem;color:var(--muted);font-weight:500;margin-bottom:4px}
+.tg-val{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:900;color:var(--navy);line-height:1}
+.tg-note{font-size:.65rem;color:var(--muted);margin-top:3px}
+.tg-good{color:var(--green)}
+.tg-warn{color:var(--amber)}
+
+/* ── ALERT BAND ── */
+.alert-band{background:linear-gradient(135deg,#0f1923 0%,#1e2b45 100%);border-radius:var(--r);padding:28px 32px;display:flex;align-items:center;gap:28px}
+.ab-icon{font-size:2rem;flex-shrink:0}
+.ab-text{font-size:.88rem;color:#b0c4de;line-height:1.55}
+.ab-text strong{color:#fff;font-size:.95rem;display:block;margin-bottom:4px}
+.ab-action{margin-left:auto;flex-shrink:0;background:var(--lime);color:var(--navy);font-weight:700;font-size:.75rem;padding:9px 18px;border-radius:100px;white-space:nowrap}
+
+/* ── FOOTER ── */
+footer{background:var(--navy);padding:24px 44px;margin-top:60px}
+.footer-inner{max-width:1180px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+footer p{font-size:.7rem;color:#3a5070}
+footer strong{color:#6b7a90}
+
+@media(max-width:960px){.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:1fr}.g2,.g21{grid-template-columns:1fr}.hero-kpis{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">
+    <div class="logo-box">G</div>
+    <div>
+      <div class="logo-name">FreshGrads University Analytics</div>
+      <div class="logo-tagline">Student Engagement & Employer Demand Insights</div>
+    </div>
+  </div>
+  <div class="nav-right">
+    <span class="pill" style="background:#fef2f2; color:#ef4444; font-weight:700;">[ILLUSTRATIVE DATA]</span>
+    <div class="dot-live">Updated today</div>
+    <span class="pill pill-ghost">Spring 2026</span>
+
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-tag">[UNIVERSITY NAME] · Spring 2026</div>
+    <h1>FreshGrads Career Insights</h1>
+    <p class="hero-desc">Student engagement and employer demand signals, based on activity on FreshGrads.</p>
+
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ── HEADLINE INJECTION ── -->
+<div class="section-head" style="margin-top:10px;"><h2>Top Companies by Student Interest</h2></div><div style="background:var(--card);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden;"><div style="display:flex; justify-content:space-between; align-items:center; padding:20px 24px; border-bottom:1px solid var(--border); background:#f8fafc;">  <div style="font-weight:700; font-size:1.25rem; color:var(--navy);">Orchestra</div>  <div style="font-weight:500; font-size:0.9rem; color:#64748b; display:flex; gap:16px; align-items:center;">    <span style="display:inline-block; min-width:110px; text-align:right;"><b>245</b> explored</span>    <span style="display:inline-block; min-width:90px; text-align:right;"><b>52</b> saved</span>  </div></div><div style="display:flex; justify-content:space-between; align-items:center; padding:20px 24px; border-bottom:1px solid var(--border); background:#ffffff;">  <div style="font-weight:700; font-size:1.25rem; color:var(--navy);">Gemini</div>  <div style="font-weight:500; font-size:0.9rem; color:#64748b; display:flex; gap:16px; align-items:center;">    <span style="display:inline-block; min-width:110px; text-align:right;"><b>222</b> explored</span>    <span style="display:inline-block; min-width:90px; text-align:right;"><b>50</b> saved</span>  </div></div><div style="display:flex; justify-content:space-between; align-items:center; padding:20px 24px; border-bottom:1px solid var(--border); background:#f8fafc;">  <div style="font-weight:700; font-size:1.25rem; color:var(--navy);">AbbVie</div>  <div style="font-weight:500; font-size:0.9rem; color:#64748b; display:flex; gap:16px; align-items:center;">    <span style="display:inline-block; min-width:110px; text-align:right;"><b>179</b> explored</span>    <span style="display:inline-block; min-width:90px; text-align:right;"><b>42</b> saved</span>  </div></div><div style="display:flex; justify-content:space-between; align-items:center; padding:20px 24px; border-bottom:1px solid var(--border); background:#ffffff;">  <div style="font-weight:700; font-size:1.25rem; color:var(--navy);">LVMH Perfumes & Cosmetics</div>  <div style="font-weight:500; font-size:0.9rem; color:#64748b; display:flex; gap:16px; align-items:center;">    <span style="display:inline-block; min-width:110px; text-align:right;"><b>154</b> explored</span>    <span style="display:inline-block; min-width:90px; text-align:right;"><b>35</b> saved</span>  </div></div><div style="display:flex; justify-content:space-between; align-items:center; padding:20px 24px; border-bottom:1px solid var(--border); background:#f8fafc;">  <div style="font-weight:700; font-size:1.25rem; color:var(--navy);">Formlabs</div>  <div style="font-weight:500; font-size:0.9rem; color:#64748b; display:flex; gap:16px; align-items:center;">    <span style="display:inline-block; min-width:110px; text-align:right;"><b>149</b> explored</span>    <span style="display:inline-block; min-width:90px; text-align:right;"><b>33</b> saved</span>  </div></div><div style="display:flex; justify-content:space-between; align-items:center; padding:20px 24px; border-bottom:1px solid var(--border); background:#ffffff;">  <div style="font-weight:700; font-size:1.25rem; color:var(--navy);">MetOx International, Inc.</div>  <div style="font-weight:500; font-size:0.9rem; color:#64748b; display:flex; gap:16px; align-items:center;">    <span style="display:inline-block; min-width:110px; text-align:right;"><b>110</b> explored</span>    <span style="display:inline-block; min-width:90px; text-align:right;"><b>29</b> saved</span>  </div></div><div style="display:flex; justify-content:space-between; align-items:center; padding:20px 24px; border-bottom:1px solid var(--border); background:#f8fafc;">  <div style="font-weight:700; font-size:1.25rem; color:var(--navy);">Polymarket</div>  <div style="font-weight:500; font-size:0.9rem; color:#64748b; display:flex; gap:16px; align-items:center;">    <span style="display:inline-block; min-width:110px; text-align:right;"><b>93</b> explored</span>    <span style="display:inline-block; min-width:90px; text-align:right;"><b>32</b> saved</span>  </div></div><div style="display:flex; justify-content:space-between; align-items:center; padding:20px 24px; border-bottom:1px solid var(--border); background:#ffffff;">  <div style="font-weight:700; font-size:1.25rem; color:var(--navy);">Hermeus</div>  <div style="font-weight:500; font-size:0.9rem; color:#64748b; display:flex; gap:16px; align-items:center;">    <span style="display:inline-block; min-width:110px; text-align:right;"><b>99</b> explored</span>    <span style="display:inline-block; min-width:90px; text-align:right;"><b>21</b> saved</span>  </div></div><div style="display:flex; justify-content:space-between; align-items:center; padding:20px 24px; border-bottom:1px solid var(--border); background:#f8fafc;">  <div style="font-weight:700; font-size:1.25rem; color:var(--navy);">Exowatt</div>  <div style="font-weight:500; font-size:0.9rem; color:#64748b; display:flex; gap:16px; align-items:center;">    <span style="display:inline-block; min-width:110px; text-align:right;"><b>94</b> explored</span>    <span style="display:inline-block; min-width:90px; text-align:right;"><b>26</b> saved</span>  </div></div><div style="display:flex; justify-content:space-between; align-items:center; padding:20px 24px; border-bottom:1px solid var(--border); background:#ffffff;">  <div style="font-weight:700; font-size:1.25rem; color:var(--navy);">iCapital</div>  <div style="font-weight:500; font-size:0.9rem; color:#64748b; display:flex; gap:16px; align-items:center;">    <span style="display:inline-block; min-width:110px; text-align:right;"><b>94</b> explored</span>    <span style="display:inline-block; min-width:90px; text-align:right;"><b>25</b> saved</span>  </div></div></div><div style="margin-top:12px; font-size:0.85rem; color:#94a3b8; text-align:right;">* Explored = job listing opened. Saved = bookmarked by student</div>
+<!-- ── END HEADLINE ── -->
+
+
+
+
+
+
+<!-- MOVED OUTCOMES DOWN -->
+
+<div class="section-head" style="margin-top:40px;"><h2>Top Company Demand Signals</h2></div>
+<p style="font-size:0.95rem; color:#64748b; margin-top:-10px; margin-bottom:20px;">Gemini and Orchestra lead across every stage of student interest this month.</p>
+<div class="g4">
+<div class="card c-pad">
+<div class="c-head"><div class="c-title">Most Viewed Companies</div><div class="c-sub">Total student clicks</div></div>
+<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">Gemini</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">245 views</span></div>
+<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">Orchestra</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">204 views</span></div>
+<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">AbbVie</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">203 views</span></div>
+<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">LVMH Perfumes & Cosmetics</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">167 views</span></div>
+<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">Formlabs</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">136 views</span></div>
+</div>
+<div class="card c-pad">
+<div class="c-head"><div class="c-title">Most Bookmarked</div><div class="c-sub">High-intent saving</div></div>
+<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">Gemini</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">54 saves</span></div>
+<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">Orchestra</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">47 saves</span></div>
+<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">AbbVie</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">43 saves</span></div>
+<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">LVMH Perfumes & Cosmetics</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">38 saves</span></div>
+<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">Formlabs</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">29 saves</span></div>
+</div>
+<div class="card c-pad">
+<div class="c-head"><div class="c-title">Most Applications</div><div class="c-sub" style="color:var(--muted); font-size:0.75rem;">Self-reported by students (unverified)</div></div>
+<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">Gemini</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">79 apps</span></div>
+<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">Orchestra</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">70 apps</span></div>
+<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">AbbVie</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">65 apps</span></div>
+<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">LVMH Perfumes & Cosmetics</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">45 apps</span></div>
+<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">Exowatt</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">43 apps</span></div>
+</div>
+<div class="card c-pad" style="display:flex; flex-direction:column;">
+<div class="c-head"><div class="c-title">Time to First Engagement</div><div class="c-sub" style="color:var(--muted); font-size:0.75rem;">From posting to first student engagement</div></div>
+<div style="flex:1; display:flex; align-items:center; justify-content:center; padding-bottom:15px;">
+<div style="text-align:center;">
+<div style="font-size:3.5rem; font-weight:800; color:var(--navy); line-height:1; letter-spacing:-0.03em;">2.3</div>
+<div style="font-size:1rem; font-weight:600; color:#64748b; margin-top:10px;">days average</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="section-head"><h2>Employer Demand by Major</h2></div>
+<p style="font-size:0.95rem; color:#64748b; margin-top:-10px; margin-bottom:20px;">Top application targets broken down by academic program.</p>
+<div class="g3"><div class="card c-pad"><div class="c-head"><div class="c-title">Arts & Design</div><div class="c-sub">Top Companies by Applications (self-reported)</div></div><div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">Built Technologies</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">4 apps</span></div><div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">AbbVie</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">3 apps</span></div><div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">Orchestra</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">3 apps</span></div><div style="margin-top:12px; font-size:0.75rem; color:#94a3b8; font-style:italic;">* Sample size limited — directional only</div></div><div class="card c-pad"><div class="c-head"><div class="c-title">Business & Economics</div><div class="c-sub">Top Companies by Applications (self-reported)</div></div><div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">Gemini</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">8 apps</span></div><div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">Orchestra</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">8 apps</span></div><div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">Polymarket</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">6 apps</span></div><div style="margin-top:12px; font-size:0.75rem; color:#94a3b8; font-style:italic;">* Sample size limited — directional only</div></div><div class="card c-pad"><div class="c-head"><div class="c-title">Health & Life Sciences</div><div class="c-sub">Top Companies by Applications (self-reported)</div></div><div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">DRW</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">8 apps</span></div><div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">Gemini</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">6 apps</span></div><div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">MetOx International,&nbsp;Inc.</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">5 apps</span></div><div style="margin-top:12px; font-size:0.75rem; color:#94a3b8; font-style:italic;">* Sample size limited — directional only</div></div><div class="card c-pad"><div class="c-head"><div class="c-title">Humanities</div><div class="c-sub">Top Companies by Applications (self-reported)</div></div><div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">Gemini</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">4 apps</span></div><div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">Formlabs</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">4 apps</span></div><div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">AbbVie</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">3 apps</span></div><div style="margin-top:12px; font-size:0.75rem; color:#94a3b8; font-style:italic;">* Sample size limited — directional only</div></div><div class="card c-pad"><div class="c-head"><div class="c-title">Public Policy & Government</div><div class="c-sub">Top Companies by Applications (self-reported)</div></div><div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">Orchestra</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">4 apps</span></div><div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">tenexlabs</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">2 apps</span></div><div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">Bosch Group</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">2 apps</span></div><div style="margin-top:12px; font-size:0.75rem; color:#94a3b8; font-style:italic;">* Sample size limited — directional only</div></div><div class="card c-pad"><div class="c-head"><div class="c-title">STEM</div><div class="c-sub">Top Companies by Applications (self-reported)</div></div><div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">LVMH Perfumes & Cosmetics</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">8 apps</span></div><div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">Exowatt</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">4 apps</span></div><div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">Gemini</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">4 apps</span></div><div style="margin-top:12px; font-size:0.75rem; color:#94a3b8; font-style:italic;">* Sample size limited — directional only</div></div><div class="card c-pad"><div class="c-head"><div class="c-title">Social Sciences</div><div class="c-sub">Top Companies by Applications (self-reported)</div></div><div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">City of Philadelphia</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">3 apps</span></div><div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">Hypebeast</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">3 apps</span></div><div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0ede7;"><span style="font-weight:500;">AbbVie</span><span style="display:inline-block; min-width:80px; text-align:right; color:var(--navy3); font-weight:600;">2 apps</span></div><div style="margin-top:12px; font-size:0.75rem; color:#94a3b8; font-style:italic;">* Sample size limited — directional only</div></div></div>
+
+
+</div><!-- /main -->
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <p><strong>FreshGrads University Analytics</strong> — Career Outcomes Intelligence Platform</p>
+      <p>Spring 2026 · 500-student pilot · Data refreshed daily</p>
+      <p style="margin-top:8px; font-style:italic;">Views = job listing opened. Saves = bookmarked by student. Applications = self-reported by student (unverified). Data range: Spring 2026.</p>
+    </div>
+    <div>
+      <p>Questions? Contact your FreshGrads account manager</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+
+
+const industryLabels = ["Technology & Software", "Finance & Fintech", "Healthcare & Biotech", "Consumer & Retail", "Aerospace & Deep Tech"];
+const industryData = [5566, 665, 364, 208, 158];
+const majorLabels = ["Arts & Design", "Business & Economics", "Health & Life Sciences", "Humanities", "Public Policy & Government", "STEM", "Social Sciences"];
+const crossTabDatasets = [{"label": "Technology & Software", "data": [496, 1199, 1097, 617, 508, 1102, 547]}, {"label": "Finance & Fintech", "data": [56, 159, 155, 88, 43, 100, 64]}, {"label": "Healthcare & Biotech", "data": [47, 76, 59, 54, 28, 66, 34]}, {"label": "Consumer & Retail", "data": [26, 50, 34, 18, 20, 50, 10]}, {"label": "Aerospace & Deep Tech", "data": [17, 45, 30, 14, 7, 26, 19]}];
+
+
+
+
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.color = '#64748b';
+const C = {lime:'#0ea5e9',navy:'#0f172a',navy2:'#1e293b',navy3:'#334155',green:'#22c55e',red:'#ef4444',amber:'#f59e0b',muted:'#64748b'};
+
+
+
+
+
+
+
+
+
+
+document.querySelectorAll('[data-count]').forEach(el => {
+  const target = parseInt(el.getAttribute('data-count').replace(/,/g,''));
+  let cur = 0; const step = Math.ceil(target/30);
+  const t = setInterval(()=>{ cur=Math.min(cur+step,target); el.textContent=cur.toLocaleString(); if(cur>=target)clearInterval(t); },38);
+});
+</script>
+</body>
+</html>
